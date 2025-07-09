@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Back } from "../components/back";
 import { Table } from "../components/table";
 import { ButtonPlus } from "../components/button";
@@ -51,6 +51,7 @@ if(Data) {
 }
 },[Data])
   return(
+     <Suspense fallback={<div>Загрузка...</div>}>
     <div className="px-[21px] pb-[100px]">
     <div className="w-full flex items-center justify-between mt-[20px]">
         <div className="flex-1 flex justify-start mt-[9px]"><Back/></div>
@@ -91,5 +92,6 @@ if(Data) {
 
 
     </div>
+    </Suspense>
   );
 }
