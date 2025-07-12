@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import '../assets/timer.scss';
+
 const pad = (n: number) => n.toString().padStart(2, '0');
 const range = (max: number) => Array.from({ length: max }, (_, i) => i);
 
@@ -19,41 +20,57 @@ const Picker = ({ values, selected, onChange }: {
   const isScrollingRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Скроллим к выбранному элементу по центру
+  const [activeIndex, setActiveIndex] = useState(0);
+
+
+  const REPEAT_COUNT = 100;
+  const fullValues = Array.from({ length: values.length * REPEAT_COUNT }, (_, i) => values[i % values.length]);
+  const middleIndex = Math.floor(fullValues.length / 2);
+
+  // Изначальный скролл к центральному значению
   useEffect(() => {
     if (!containerRef.current) return;
-    const scrollTop = ITEM_HEIGHT * selected;
+    const initialIndex = middleIndex - (middleIndex % values.length) + selected;
+    const scrollTop = initialIndex * ITEM_HEIGHT;
     isScrollingRef.current = true;
     containerRef.current.scrollTo({ top: scrollTop, behavior: 'auto' });
+    setActiveIndex(initialIndex);
 
-    // Снимаем блокировку через 100мс (после скролла)
     setTimeout(() => {
       isScrollingRef.current = false;
     }, 100);
   }, [selected]);
 
-  // Обработка скролла
   const handleScrollEnd = () => {
     if (!containerRef.current) return;
+
     const scrollTop = containerRef.current.scrollTop;
     const index = Math.round(scrollTop / ITEM_HEIGHT);
-    const newScrollTop = index * ITEM_HEIGHT;
+    const value = fullValues[index % values.length];
 
-    // Блокируем повторный вызов скролла во время анимации
+    setActiveIndex(index);
+
+    const newScrollTop = index * ITEM_HEIGHT;
     isScrollingRef.current = true;
     containerRef.current.scrollTo({ top: newScrollTop, behavior: 'smooth' });
 
     setTimeout(() => {
       isScrollingRef.current = false;
-    }, 250);
+    }, 150);
 
-    onChange(index);
+    onChange(value);
   };
 
   const onScroll = () => {
-    if (isScrollingRef.current) return; // игнорируем скролл во время программного
+    if (isScrollingRef.current) return;
+
+   
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(handleScrollEnd, 150);
+
+    timeoutRef.current = setTimeout(() => {
+      handleScrollEnd();
+     
+    }, 80); // сократили задержку для лучшего UX
   };
 
   return (
@@ -69,27 +86,30 @@ const Picker = ({ values, selected, onChange }: {
           paddingBottom: `${ITEM_HEIGHT * CENTER_INDEX}px`,
         }}
       >
-        {values.map((val, i) => {
-          const distance = Math.abs(i - selected);
+        {fullValues.map((val, i) => {
+          const distance = Math.abs(i - activeIndex);
+
           let sizeClass = 'text-xl';
           let colorClass = 'text-[#DCE153]';
 
-          if (distance === 0) {
-            sizeClass = 'text-[52px]';
-            colorClass = 'text-[#DCE153]';
-          } else if (distance === 1) {
-            sizeClass = 'text-[46px]';
-            colorClass = 'text-[#BEC33580]';
-          } else if (distance === 2) {
-            sizeClass = 'text-[36px]';
-            colorClass = 'text-[#BEC33540]';
-          }
+          
+            if (distance === 0) {
+              sizeClass = 'text-[52px]';
+              colorClass = 'text-[#DCE153]';
+            } else if (distance === 1) {
+              sizeClass = 'text-[46px]';
+              colorClass = 'text-[#BEC33580]';
+            } else if (distance === 2) {
+              sizeClass = 'text-[36px]';
+              colorClass = 'text-[#BEC33540]';
+            }
+          
 
           return (
             <div
               key={i}
               className={clsx(
-                'duration-[400ms] w-full flex justify-center items-center transition-all duration-200 ease-in-out',
+                'select-none cursor-pointer duration-[200ms] w-full flex justify-center items-center transition-all ease-in-out',
                 sizeClass,
                 colorClass
               )}
@@ -105,12 +125,15 @@ const Picker = ({ values, selected, onChange }: {
 };
 
 
-
-
-export default function TimerPicker() {
+export default function TimerPicker({ setSec }: { setSec: (val: number) => void }) {
   const [hour, setHour] = useState(0);
   const [minute, setMinute] = useState(0);
   const [second, setSecond] = useState(0);
+
+  useEffect(() => {
+    const totalSeconds = hour * 3600 + minute * 60 + second;
+    setSec(totalSeconds);
+  }, [hour, minute, second]);
 
   return (
     <div className="flex items-center justify-center mt-[168px] gap-4">
@@ -122,3 +145,4 @@ export default function TimerPicker() {
     </div>
   );
 }
+
