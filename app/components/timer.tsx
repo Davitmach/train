@@ -109,7 +109,7 @@ const Picker = ({ values, selected, onChange }: {
             <div
               key={i}
               className={clsx(
-                'select-none cursor-pointer duration-[200ms] w-full flex justify-center items-center transition-all ease-in-out',
+                'select-none cursor-pointer  w-full flex justify-center items-center duration-300 transition-all ease-[cubic-bezier(0.25,0.1,0.25,1)]',
                 sizeClass,
                 colorClass
               )}

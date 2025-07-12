@@ -17,11 +17,13 @@ console.log(sec);
       <div className="w-full flex items-center justify-center mt-[20px]">
         <h1 className="text-black2 font-[500] text-[28px]">Запуск таймера</h1>
       </div>
-{activeTimer==false ?<TimerPicker  setSec={setSec} /> :<CountdownTimer setActiveTimer={setActiveTimer} totalSeconds={sec} />}
+{activeTimer==false  ?<TimerPicker  setSec={setSec} /> : <CountdownTimer setActiveTimer={setActiveTimer} totalSeconds={sec} />}
       
 {
 activeTimer ==false && <ButtonPlay onClick={()=> {
+  if(sec>0) {
   setActiveTimer(true)
+  }
 }} className="mt-[20px] cursor-pointer"/> 
 }
 

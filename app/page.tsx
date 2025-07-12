@@ -1,12 +1,13 @@
-import Image from "next/image";
-import { ClockSvg, HomeSvg } from "./components/Svg";
-import { Table } from "./components/table";
+'use client';
 import { Calendar } from "./components/calendar";
 import { StatusBar } from "./components/statusBar";
 import { Task } from "./components/task";
 import { ButtonPlus } from "./components/button";
+import { NewTask } from "./components/newTask";
+import { useState } from "react";
 
 export default function Home() {
+  const [active,setActive] = useState(false);
   return (
   <>
 
@@ -37,9 +38,9 @@ train={[
   }
 ]}
 />
-<ButtonPlus/>
+<ButtonPlus onClick={()=> setActive(true)}/>
 </div>
-
+{active==true &&<NewTask setActive={setActive}/>}
   </>
   );
 }
